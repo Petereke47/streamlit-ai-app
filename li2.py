@@ -84,117 +84,87 @@ client = OpenAI(
     api_key=api_key,
 )
 
-st.set_page_config(page_title="NEXUS AI", page_icon="🤖")
+st.set_page_config(page_title="ChatGPT", page_icon="💬")
 
-# --- Futuristic UI ---
+# --- ChatGPT-style UI ---
 st.markdown("""
 <style>
-/* Animated gradient background */
-.stApp {
-    background: linear-gradient(135deg, #0a0e1a 0%, #0d1117 40%, #0a0e1a 100%);
-    background-attachment: fixed;
-}
-.stApp::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-        radial-gradient(ellipse at 20% 0%, rgba(0,240,255,0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 100%, rgba(168,85,247,0.08) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-}
+/* Clean white background */
+.stApp { background: #ffffff; }
 
-/* Title with gradient text */
+/* Header — centered, minimal */
 h1 {
-    background: linear-gradient(90deg, #00f0ff, #a855f7, #00f0ff);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s linear infinite;
-    font-weight: 800;
-    letter-spacing: 2px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: center;
+    padding-top: 10px;
 }
-@keyframes shimmer {
-    to { background-position: 200% center; }
+.chatgpt-subtitle {
+    text-align: center;
+    color: #6e6e80;
+    font-size: 13px;
+    margin-top: -8px;
+    margin-bottom: 20px;
 }
 
-/* Chat messages — glassmorphism */
+/* Chat messages — no bubbles, clean spacing */
 [data-testid="stChatMessage"] {
-    background: rgba(17,24,39,0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8px 0;
+}
+
+/* User messages — subtle gray bubble */
+.stChatMessage:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
+    background: #f4f4f4;
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-[data-testid="stChatMessage"]:hover {
-    border-color: rgba(0,240,255,0.25);
-    box-shadow: 0 4px 32px rgba(0,240,255,0.08);
+    padding: 10px 16px;
+    display: inline-block;
 }
 
-/* User messages — cyan glow */
-[data-testid="stChatMessage"][data-testid-type="user"],
-.stChatMessage:has([data-testid="stChatMessageAvatarUser"]) {
-    border-left: 3px solid rgba(0,240,255,0.5);
+/* Assistant messages — plain text, no bubble */
+.stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {
+    background: transparent;
+    padding: 4px 0;
 }
 
-/* Assistant messages — purple glow */
-.stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) {
-    border-left: 3px solid rgba(168,85,247,0.5);
-}
-
-/* Chat input — glowing border */
+/* Chat input — rounded, minimal */
 [data-testid="stChatInput"] {
-    border-color: rgba(0,240,255,0.2);
-    border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0,240,255,0.05);
+    border: 1px solid #e0e0e0;
+    border-radius: 24px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.05);
+    padding: 8px 16px;
 }
-[data-testid="stChatInputTextArea"]:focus {
-    box-shadow: 0 0 0 2px rgba(0,240,255,0.3);
+[data-testid="stChatInputTextArea"] {
+    color: #1a1a1a;
 }
 
-/* File uploader — glassmorphic */
+/* File uploader — minimal */
 [data-testid="stFileUploader"] {
-    background: rgba(17,24,39,0.4);
-    backdrop-filter: blur(8px);
+    border: 1px solid #e0e0e0;
     border-radius: 12px;
-    border: 1px dashed rgba(0,240,255,0.25);
+    background: #fafafa;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #00f0ff, #a855f7);
-    border-radius: 3px;
-}
-
-/* Info boxes */
+/* Info boxes — subtle */
 [data-testid="stAlert"] {
-    background: rgba(17,24,39,0.5);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(0,240,255,0.15);
+    background: #f7f7f8;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
 }
 
-/* Status badge under title */
-.nexus-status {
-    display: inline-block;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    color: #00f0ff;
-    background: rgba(0,240,255,0.08);
-    border: 1px solid rgba(0,240,255,0.2);
-    margin-bottom: 8px;
-}
+/* Scrollbar — minimal */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🤖 NEXUS AI")
-st.markdown('<div class="nexus-status">● Online · Powered by Gemini 2.5 Flash</div>', unsafe_allow_html=True)
+st.title("💬 ChatGPT")
+st.markdown('<div class="chatgpt-subtitle">Powered by Gemini 2.5 Flash</div>', unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
