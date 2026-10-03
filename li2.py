@@ -163,6 +163,7 @@ if user_prompt := st.chat_input("Ask anything..."):
                 model=MODEL,
                 messages=api_messages,
                 stream=True,
+                max_tokens=4000,
             )
             for chunk in response_stream:
                 if chunk.choices and chunk.choices[0].delta.content:
