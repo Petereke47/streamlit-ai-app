@@ -235,18 +235,21 @@ if user_prompt := st.chat_input("Ask anything..."):
     for m in st.session_state["messages"]:
         api_messages.append({"role": m["role"], "content": m["content"]})
 
-    # Stream response
+    # Stream response with error handling
     with st.chat_message("assistant"):
         def response_generator():
-            response_stream = client.chat.completions.create(
-                model=MODEL,
-                messages=api_messages,
-                stream=True,
-                max_tokens=4000,
-            )
-            for chunk in response_stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+            try:
+                response_stream = client.chat.completions.create(
+                    model=MODEL,
+                    messages=api_messages,
+                    stream=True,
+                    max_tokens=2000,
+                )
+                for chunk in response_stream:
+                    if chunk.choices and chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+            except Exception as e:
+                yield f"⚠️ Error: {e}"
 
         full_response = st.write_stream(response_generator())
 
