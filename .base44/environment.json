@@ -1,0 +1,13 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/_stcore/health",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "OPENROUTER_API_KEY",
+      "description": "OpenRouter API key for LLM chat completions. Get it from https://openrouter.ai/keys",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    }
+  ]
+}
